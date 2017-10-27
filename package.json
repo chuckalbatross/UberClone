@@ -1,0 +1,27 @@
+{
+  "name": "driver-location-service",
+  "version": "0.0.1",
+  "description": "Manage the current location of drivers in network",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "start": "nodemon --inspect server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chuckalbatross/UberClone.git"
+  },
+  "author": "James Bonner IV",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chuckalbatross/UberClone/issues"
+  },
+  "homepage": "https://github.com/chuckalbatross/UberClone#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "mysql": "^2.15.0"
+  },
+  "devDependencies": {
+    "underscore": "^1.8.3"
+  }
+}
