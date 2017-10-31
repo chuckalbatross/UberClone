@@ -1,5 +1,5 @@
 const mysql = require('mysql');
-const Sequelize = require('sequelize');
+// const moment = require('moment');
   
 // Create a database connection and export it from this file.
 // You will need to connect with the user "root", no password,
@@ -7,7 +7,8 @@ const Sequelize = require('sequelize');
 
 const connection = mysql.createConnection({
   user: 'root',
-  password: ''
+  password: '',
+  database: 'tripsDB'
 });
 
 connection.connect(err => {
@@ -18,15 +19,33 @@ connection.connect(err => {
   }
 })
 
-const sequelize = new Sequelize('bookings', 'root', null, {
-  host: 'localhost',
-  dialect: 'mysql'
-});
+// SEQUELIZE: REFACTOR FOR SPEED PERFORMANCE BENCHMARK VS RAW QUERY
 
-sequelize.authenticate()
-  .then(() => {
-    console.log('Success! Sequelize connection established');
-  })
-  .catch(err => {
-    console.log(`Error! Sequelize unable to connect to database: ${err}`);
-  });
+// const db = new Sequelize('bookings', 'root', '', {
+//   host: 'localhost',
+//   dialect: 'mysql'
+// });
+
+// db.authenticate()
+//   .then(() => {
+//     console.log('Success! Sequelize connection established');
+//   })
+//   .catch(err => {
+//     console.log(`Error! Sequelize unable to connect to database: ${err}`);
+//   });
+
+// // DEFINE MODELS
+
+// const Trip = db.define('trip', {
+//   id: {
+//     type: Sequelize.
+//   }
+//   'driver-uuid': {
+//     type: Sequelize.DataTypes.UUID,
+//     defaultValue: Sequelize.DataTypes.UUIDV1,
+//     allowNull: false
+//   }
+// })
+
+
+// module.exports.connection = connection;
