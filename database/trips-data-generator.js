@@ -4,18 +4,8 @@ const moment = require('moment');
 
 // CREATE SAMPLE TRIP AND WRITE TO DB
 var chance = new Chance();
-// var driverGuidArr = [];
-// var driverGuid;
-// for (var i = 0; i < 10000; i++) {
-//   driverGuid = chance.guid();
 
-//   driverGuidArr.push(driverGuid);
-// }
 
-// Test to confirm all GUIDs are unique
-// var uniqueGUID = driverGuidArr.filter(function(item, pos) {
-//   return driverGuidArr.indexOf(item) === pos;
-// })
 
 // PICK ONE random
 // console.log('GUID Arr Length:', driverGuidArr.length);
@@ -23,13 +13,31 @@ var chance = new Chance();
 //   console.log(chance.pickone(driverGuidArr));
 // }
 
+
+// CREATE 20K DRIVER GUIDs
+var driverGuidArr = [];
+for (var i = 0; i < 20000; i++) {
+  driverGuidArr.push(chance.guid());
+}
+
+// Test to confirm all GUIDs are unique
+// var uniqueGUID = driverGuidArr.filter(function(item, pos) {
+//   return driverGuidArr.indexOf(item) === pos;
+// })
+
+// CREATE 100K RIDER GUIDs
+var riderGuidArr = [];
+for (var i = 0; i < 100000; i++) {
+  riderGuidArr.push(chance.guid());
+}
+
 var tripsArr = [];
-console.log(moment().format('YYYY-MM-DD HH:mm:ss'))
+
 for (var i = 0; i < 250000; i++) {
   var trip = {};
 
-  trip.driverGuid = chance.guid();
-  trip.riderGuid = chance.guid();
+  trip.driverGuid = chance.pickone(driverGuidArr);
+  trip.riderGuid = chance.pickone(riderGuidArr);
 
   trip.category = chance.weighted(['x','select','black','xl'], [80, 9, 4, 7]);
 
@@ -50,14 +58,9 @@ for (var i = 0; i < 250000; i++) {
   var dropoffSeed = pickupSeed + chance.integer({min: (0.8 * trip.dropoffEst * 60000), max: (1.6 * trip.dropoffEst * 60000)})
   trip.dropoffTimestamp = moment(dropoffSeed).format('YYYY-MM-DD HH:mm:ss');
 
-  // var arrivingSeed = chance.integer({min: 1504308116000, max: 1509405731000})
-  // trip.arrivingTimestamp = moment(arrivingSeed).format('YYYY-MM-DD HH:mm:ss');
-  // var pickupSeed = arrivingSeed + chance.integer({min: (0.8 * trip.pickupEst * 60000), max: (1.6 * trip.pickupEst * 60000)})
-  // trip.pickupTimestamp = moment(pickupSeed).format('YYYY-MM-DD HH:mm:ss');
-  // var dropoffSeed = pickupSeed + chance.integer({min: (0.8 * trip.dropoffEst * 60000), max: (1.6 * trip.dropoffEst * 60000)})
-  // trip.dropoffTimestamp = moment(dropoffSeed).format('YYYY-MM-DD HH:mm:ss');
-
   trip.surgeMultiplier = chance.weighted([1.0, chance.floating({min: 1, max: 2, fixed: 1}), chance.floating({min: 2.1, max: 3, fixed: 1})], [0.7, 0.2, 0.1]);
+
+  tripsArr.push(trip);
 
   // console.log(trip);
   // console.log('pickupEst: ', trip.pickupEst);
@@ -65,11 +68,11 @@ for (var i = 0; i < 250000; i++) {
   // console.log('arrivingSeed: ', arrivingSeed);
   // console.log('pickupSeed: ', pickupSeed);
   // console.log('dropoffSeed: ', dropoffSeed);
-  tripsArr.push(trip);
-  // console.log(i);
 }
-console.log(moment().format('YYYY-MM-DD HH:mm:ss'))
-console.log(tripsArr);
+
+
+
+// Testing getting the correct date format from momentjs
 // console.log(moment.unix())
 // var testDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
 // console.log('testDate:', testDate);
