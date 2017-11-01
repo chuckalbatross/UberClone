@@ -1,15 +1,6 @@
 const Chance = require('chance');
 var chance = new Chance();
 
-// ES6 CLASSES (prototype OO vs class OO)
-// var Driver = class {
-//   constructor(guid, lat, long) {
-//     this.guid = guid;
-//     this.lat = lat;
-//     this.long = long;
-//   }
-// }
-
 
 var Driver = function(guid, lat, long) {
   this.guid = guid;
@@ -19,50 +10,80 @@ var Driver = function(guid, lat, long) {
   }
 }
 
-// Option 1: encase this in setInterval (minimalist daemon framework?)
-// OR
-// Option 2: include setInterval within function (better because this should be independent to each driver)
-Driver.prototype.transmitLocation = function() {
+var setIntervalX = function(callback, delay, repetitions) {
+  var x = 0;
 
-  
-  console.log(`Driver ${this.guid} - Lat: ${this.currPos.lat}, Long: ${this.currPos.long}`);
-}
-// Phase 2: set up SQS and have drivers post to it (after driverLocation service, so driverLocation can consume it)
-// start with http?
+  var intervalID = setInterval( () => {
+    callback();
 
-Driver.prototype.dropoffDriver = function(pickupObj, dropoffObj) {
-  //** pickupObj.lat
-  //** pickupObj.long
-  //** pickupObj.est
-
-  //** dropoffObj.lat
-  //** dropoffObj.long
-  //** dropoffObj.est
-
-  /*
-  CURR_POSITION => PICKUP_POSITION
-
-  INTRODUCE CHANCE BY MULTIPLYING EST
-
-    pickupEst to ms (multiply by 60,000)
-    deltaLat = (pickupLat - currLat) / 5000
-    deltaLong = (pickupLong - currLong) / 5000
-
-
-    while (currPos !== pickupPos) {
-      setInterval(5 seconds) {
-         currLat += deltaLat
-         currLong += deltaLong
-      }
+    if (++x === repetitions) {
+      clearInterval(intervalID);
     }
+  }, delay);
 
-  PICKUP_POS => DROPOFF_POS
-*/
+}
+
+Driver.prototype.transmitLocation = function() {
+  // console.log(`Driver ${this.guid} - Lat: ${this.currPos.lat}, Long: ${this.currPos.long}`);
+  setInterval(() => {
+    console.log(`Driver ${this.guid} - Lat: ${this.currPos.lat}, Long: ${this.currPos.long}`);
+  }, 1000)
+}
+
+Driver.prototype.dropoffRider = function(pickupObj, dropoffObj) {
+  
+  var pickupEstMs = pickupObj.est * 60 * 1000; // INTRODUCE CHANCE BY MULTIPLYING EST
+
+  // determine lat/long movement per ms
+  var deltaLat = (pickupObj.lat - this.currPos.lat) / pickupEstMs;
+  var deltaLong = (pickupObj.long - this.currPos.long) / pickupEstMs;
+
+  // update every 5 seconds (1 min / 5 seconds)
+  var repetitions = pickupObj.est * 60 / 5;
+
+  // every 5 seconds (repeated repetition times), update driver's lat/long 5 seconds worth of movement 
+  setIntervalX( () => {
+    this.currPos.lat += (deltaLat * 5000);
+    this.currPos.long += (deltaLong * 5000);
+  }, 5000, repetitions);
+
 }
 
 
-var testDriver = new Driver('ABC', 123, 54);
-// console.log(testDriver);
-testDriver.transmitLocation()
+////////////////////////////////////////////////////////////////
+// TESTING
+////////////////////////////////////////////////////////////////
 
-console.log(0.0000023 / 10000)
+var testDriver = new Driver('b55e0217-d995-5e27-a19a-a007773b9092', 37.5875953, -122.4277966);
+
+// setInterval(function () {
+//   testDriver.transmitLocation()
+// }, 2500);
+
+testDriver.transmitLocation();
+
+var pickupObj = {
+  lat: 37.5906004,
+  long: -122.4402796,
+  est: 1
+}
+var dropoffObj = {
+  lat: 37.5660525,
+  long: -122.4216035,
+  est: 5
+}
+testDriver.dropoffRider(pickupObj, dropoffObj);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
