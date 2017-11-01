@@ -3,6 +3,10 @@
 /node_modules
 
 
+# Historical Data #
+###################
+trips.csv
+
 # Compiled source #
 ###################
 *.com
