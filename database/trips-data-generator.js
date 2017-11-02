@@ -32,7 +32,11 @@ var historicalDataGenerator = function(level) {
     }
 
     var tripsArr = [];
+
     
+    // refactor this into function (generateRandomTrip)
+    // for (....)
+      // genearteRandomTrip()
     for (var i = 0; i < 500000; i++) {
       var trip = {};
     
