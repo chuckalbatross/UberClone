@@ -7,46 +7,63 @@ var Driver = function(guid, lat, long) {
   this.currPos = {
     lat: lat,
     long: long
-  }
+  };
+  this.state = 'Available';
 }
 
-var setIntervalX = function(callback, delay, repetitions) {
+// CONVERT TO PROMISE?
+Driver.prototype.setIntervalX = function(callback, futureState, delay, repetitions) {
   var x = 0;
 
   var intervalID = setInterval( () => {
     callback();
 
     if (++x === repetitions) {
+      this.state = futureState;
       clearInterval(intervalID);
     }
   }, delay);
-
 }
 
-Driver.prototype.transmitLocation = function() {
-  // console.log(`Driver ${this.guid} - Lat: ${this.currPos.lat}, Long: ${this.currPos.long}`);
+Driver.prototype.transmitState = function() {
   setInterval(() => {
-    console.log(`Driver ${this.guid} - Lat: ${this.currPos.lat}, Long: ${this.currPos.long}`);
-  }, 1000)
+    // replace this with post to SQS
+    console.log(`Driver ${this.guid} - Lat: ${this.currPos.lat}, Long: ${this.currPos.long}, State: ${this.state}`);
+  }, 10000)
 }
 
 Driver.prototype.dropoffRider = function(pickupObj, dropoffObj) {
   
+  this.state = 'pickup';
+  // CURRENT LOCATION => PICKUP LOCATION  
   var pickupEstMs = pickupObj.est * 60 * 1000; // INTRODUCE CHANCE BY MULTIPLYING EST
-
   // determine lat/long movement per ms
   var deltaLat = (pickupObj.lat - this.currPos.lat) / pickupEstMs;
   var deltaLong = (pickupObj.long - this.currPos.long) / pickupEstMs;
-
-  // update every 5 seconds (1 min / 5 seconds)
+  // calculate number of repetitions, so position is updated every 5 seconds
   var repetitions = pickupObj.est * 60 / 5;
 
-  // every 5 seconds (repeated repetition times), update driver's lat/long 5 seconds worth of movement 
-  setIntervalX( () => {
+  // every 5 seconds (repeated "repetition" times), update driver's lat/long 5 seconds worth of movement 
+  this.setIntervalX( () => {
     this.currPos.lat += (deltaLat * 5000);
     this.currPos.long += (deltaLong * 5000);
-  }, 5000, repetitions);
+  }, 'dropoff', 5000, repetitions);
 
+  // PICKUP LOCATION => DROPOFF LOCATION
+  var dropoffEstMs = dropoffObj.est * 60 * 1000;
+  // determine lat/long movement per ms
+  deltaLat = (dropoffObj.lat - this.currPos.lat) / dropoffEstMs;
+  deltaLong = (dropoffObj.long - this.currPos.long) / dropoffEstMs;
+  // calculate number of repetitions, so position is updated every 5 seconds
+  repetitions = dropoffObj.est * 60 / 5;
+
+  this.setIntervalX( () => {
+    this.currPos.lat += (deltaLat * 5000);
+    this.currPos.long += (deltaLong * 5000);
+  }, 'available', 5000, repetitions);
+
+  // send (dropoff timestamp) so tripsDB can update record
+  // this.state = 'Available';   // ERROR: all transmitState messages show state as available. This is because you were setting state synchronously, while setInterval is async. So this.state = 'Available' at the end was called before any transmitState was called.
 }
 
 
@@ -54,14 +71,14 @@ Driver.prototype.dropoffRider = function(pickupObj, dropoffObj) {
 // TESTING
 ////////////////////////////////////////////////////////////////
 
+//now instantiate 20k drivers
+
 var testDriver = new Driver('b55e0217-d995-5e27-a19a-a007773b9092', 37.5875953, -122.4277966);
 
-// setInterval(function () {
-//   testDriver.transmitLocation()
-// }, 2500);
 
-testDriver.transmitLocation();
+testDriver.transmitState();
 
+// also needs tripID
 var pickupObj = {
   lat: 37.5906004,
   long: -122.4402796,
@@ -72,6 +89,7 @@ var dropoffObj = {
   long: -122.4216035,
   est: 5
 }
+
 testDriver.dropoffRider(pickupObj, dropoffObj);
 
 
@@ -81,7 +99,7 @@ testDriver.dropoffRider(pickupObj, dropoffObj);
 
 
 
-
+// REFACTOR WITH PROMISES!
 
 
 
