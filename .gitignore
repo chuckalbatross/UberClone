@@ -6,6 +6,10 @@
 config.json
 sqs/
 
+# Historical Data #
+###################
+trips.csv
+
 # Compiled source #
 ###################
 *.com
