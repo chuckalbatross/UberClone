@@ -58,12 +58,11 @@ var tripsGenerator = function() {
     return trip;
 }
 
-for (var i = 0; i < 20000; i++) {
+// for (var i = 0; i < 20000; i++) {
 
-  // CREATE 20K TRIPS
-  var trip = tripsGenerator();
+//   // CREATE 20K TRIPS
+//   var trip = tripsGenerator();
   
-  // ASSIGN DRIVERS TO TRIPS
-  driverArr[i].dropoffRider(trip.pickup, trip.dropoff);
-
-}
+//   // ASSIGN DRIVERS TO TRIPS
+//   driverArr[i].dropoffRider(trip.pickup, trip.dropoff);
+// }
