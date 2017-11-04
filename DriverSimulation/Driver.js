@@ -1,6 +1,9 @@
 const Chance = require('chance');
 var chance = new Chance();
 
+const AWS = require('aws-sdk');
+var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
+
 
 var Driver = function(guid, lat, long) {
   this.guid = guid;
@@ -28,7 +31,32 @@ Driver.prototype.setIntervalX = function(callback, futureState, delay, repetitio
 Driver.prototype.transmitState = function() {
   setInterval(() => {
     // replace this with post to SQS
-    console.log(`Driver ${this.guid} - Lat: ${this.currPos.lat}, Long: ${this.currPos.long}, State: ${this.state}`);
+    var params = {
+      MessageAttributes: {
+        "DriverLat": {
+          DataType: "String",
+          StringValue: JSON.stringify(this.currPos.lat)
+        },
+        "DriverLong": {
+          DataType: "String",
+          StringValue: JSON.stringify(this.currPos.long)
+        },
+        "DriverState": {
+          DataType: "String",
+          StringValue: this.state
+        }
+      },
+      MessageBody: JSON.stringify(this.guid),
+      QueueUrl: "https://sqs.us-west-2.amazonaws.com/864124496518/driverLocation"
+    };
+    // QUESTION TO ASK ANUAR MENTOR: how to error handle
+    sqs.sendMessage(params, (err, data) => {
+      if (err) {
+        console.log(`Error: ${err}`);
+      } else {
+        console.log(`Success: messageId = ${data.MessageId}`);
+      }
+    })
   }, 10000)
 }
 
