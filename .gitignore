@@ -2,6 +2,9 @@
 ###################
 /node_modules
 
+.vscode/
+config.json
+sqs/
 
 # Historical Data #
 ###################
